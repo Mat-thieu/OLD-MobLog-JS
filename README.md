@@ -1,2 +1,2 @@
 # MobLog-JS
-JS console for phones
+JavaScript console for mobile development.
