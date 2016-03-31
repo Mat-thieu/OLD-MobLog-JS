@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>MobLog Examples</title>
+
+	<script src="browser-performance.js"></script>
+	<script src="mob-log.js"></script>
+	<script>
+		var p = new Performance('MobLog init');
+		MobLog.init({
+			intercept : ['log', 'info', 'error'],
+			allowInput : true
+		})
+		p.measure();
+
+
+
+
+		// var _console = {}
+		// _console.log = console.log;
+		// console.log = extendConsole(log, 'log');
+
+		// function log(){
+		// 	console.info('PREPEND: ', arguments);
+		// }
+
+		// function extendConsole(fn, fnName) {
+		// 	return function(){
+		// 		fn.apply(this, arguments);
+		// 		if (typeof _console[fnName] === 'function') {
+		// 			_console[fnName].apply(console, arguments);
+		// 		}
+		// 	};
+		// }
+
+	</script>
+</head>
+<body>
+
+</body>
+</html>
