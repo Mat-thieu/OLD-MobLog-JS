@@ -28,7 +28,6 @@ Once MobLog has been initialized it can't be initialized again, this is due to t
 - Syntax highlighting for objects
 - Object folding (instead of showing the raw object string)
 - Big array folding
-- Boolean type coloring
 - Responsiveness
 - Browser support tests
 - Broader range of options (e.g. for styling or position)
