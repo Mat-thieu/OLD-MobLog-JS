@@ -1,6 +1,8 @@
 # MobLog-JS
 JavaScript console for mobile development.
 
+**This repo is still under development, more features will be added later**
+
 Inspired by https://github.com/chinchang/screenlog.js, I thought screenlog.js lacked many useful features so I started working on this.
 
 This is what it looks like
@@ -16,6 +18,6 @@ Initialize it like this, near the end of your head tag
 	})
 </script>
 ```
-Intercept defines which type of console commands will also be logged in MobLog.
+Intercept defines which type of console commands will also be logged in MobLog (only support for log, info and error in this version).
 
 allowInput adds an input field to the console where you can insert JavaScript code, this is done using eval() so NEVER use MobLog in production.
