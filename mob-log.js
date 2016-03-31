@@ -136,7 +136,6 @@
 			color : '#e74c3c'
 		},
 		'.MobLog-type-regular' : {
-			// padding: '1px 10px 1px 8px',
 			color : '#34495e'
 		}
 	}
@@ -202,19 +201,12 @@
 
 	function buildConsole(hasInput){
 		return 'div'.$({'id' : 'MobLog'}).add([
-			'div'.$({'id' : 'MobLog-triggerShow'}).add([
-				'div'.$({'id' : 'MobLog-triggerShow-text'}).txt('«')
-			]),
-			'div'.$({'id' : 'MobLog-output'}),
-			(function(){if(hasInput) return 'input'.$({'type' : 'text', 'id' : 'MobLog-input'}); else return 'span'.$()})()
-		]).frag();
-	}
-
-	function insertCachedConsoleCalls(){
-		app.cache.logsBeforeDOMLoad.forEach(function(data){
-			var element = 'div'.$({'class' : 'MobLog-line'}).html(typeTransform[data.type]+data.args[0]).frag();
-			app.cache.outputElement.appendChild(element);
-		});
+					'div'.$({'id' : 'MobLog-triggerShow'}).add([
+						'div'.$({'id' : 'MobLog-triggerShow-text'}).txt('«')
+					]),
+					'div'.$({'id' : 'MobLog-output'}),
+					(function(){if(hasInput) return 'input'.$({'type' : 'text', 'id' : 'MobLog-input'}); else return 'span'.$()})()
+				]).frag();
 	}
 
 	function applyEvents(hasInput){
@@ -245,42 +237,63 @@
 		}, false);
 	}
 
+	function colorByType(inp){
+		var result;
+		switch(typeof inp){
+			case 'number' :
+				result = '<span style="color : #3694D3">'+inp+'</span>'
+			break;
+
+			case 'boolean':
+				result = '<span style="color : #9b59b6">'+inp+'</span>'
+			break;
+
+			case 'string' :
+				result = '"<span style="color : #e74c3c">'+inp+'</span>"'
+			break;
+
+			default:
+				result = inp;
+		}
+		return result;
+	}
+
+	function handleObjectType(obj){
+		var output = '';
+		if(Array.isArray(obj)){
+			output += '[';
+			var argsBind = obj;
+			argsBind.forEach(function(t, ind){
+				output += colorByType(t)+(argsBind.length !== ind+1 ? ', ' : '');
+			})
+			output += ']';
+		}
+		else output += JSON.stringify(obj);
+		return output;
+	}
+
+	function insertCachedConsoleCalls(){
+		app.cache.logsBeforeDOMLoad.forEach(function(data){
+			var output = '';
+			for (var i = 0; i < data.args.length; i++) {
+				if(typeof data.args[i] !== 'object') output += colorByType(data.args[i]);
+				else output += handleObjectType(data.args[i]);
+				output += ' ';
+			};
+			var element = 'div'.$({'class' : 'MobLog-line'}).html(typeTransform[data.type]+output).frag();
+			app.cache.outputElement.appendChild(element);
+		});
+	}
+
 	function extendConsole(name){
 		var newLog = function(){
 			if(app.cache.outputElement){
 				var output = '';
 				for (var i = 0; i < arguments.length; i++) {
-					switch(typeof arguments[i]){
-						case 'number' :
-							output += '<span style="color : #3694D3">'+arguments[i]+'</span>'
-						break;
-
-						case 'object' :
-							if(Array.isArray(arguments[i])){
-								output += '[';
-								var argsBind = arguments[i];
-								argsBind.forEach(function(t, ind){
-									if(typeof t == 'string') output += '<span style="color : #e74c3c;">"'+t+'" </span>';
-									else if(typeof t == 'number') output += '<span style="color : #3694D3;">'+t+'</span>';
-
-									output += (argsBind.length !== ind+1 ? ', ' : '');
-								})
-								output += ']';
-							}
-							else{
-								output += JSON.stringify(arguments[i]);
-							}
-						break;
-
-						case 'string' :
-							output += '"<span style="color : #e74c3c">'+arguments[i]+'</span>"'
-						break;
-
-						default:
-							output += arguments[i];
-					}
+					if(typeof arguments[i] !== 'object') output += colorByType(arguments[i]);
+					else output += handleObjectType(arguments[i]);
 					output += ' ';
-				};
+				}
 				var element = 'div'.$({'class' : 'MobLog-line'}).html(typeTransform[name]+output).frag();
 				app.cache.outputElement.appendChild(element);
 			}
@@ -295,13 +308,7 @@
 		};
 	}
 
-	function test(txt){
-		var newLine = 'div'.$({'class' : 'MobLog-line'}).txt(txt).frag();
-		_id('MobLog-output').appendChild(newLine);
-	}
-
 	window.MobLog = {
-		init : init,
-		log : test
+		init : init
 	}
 })();
