@@ -43,6 +43,8 @@ Once MobLog has been initialized it can't be initialized again, this is due to t
 - Responsiveness
 - Browser support tests
 - Broader range of options (e.g. for styling or position)
+- Upon a system error, make a link to the file in which the error occured, leading to the exact rule as well
+
 - I might add console.table and console.time to the intercept option, but I'm not sure if it's worth
 
 ## Changelog
