@@ -10,9 +10,15 @@
 		var p = new Performance('MobLog init');
 		MobLog.init({
 			intercept : ['log', 'info', 'error'],
+			catchErrors : true,
 			allowInput : true
 		})
 		p.measure();
+
+
+		undefinedFunction();
+
+		// dingen
 
 	</script>
 </head>

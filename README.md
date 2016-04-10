@@ -6,31 +6,57 @@ JavaScript console for mobile development.
 Inspired by https://github.com/chinchang/screenlog.js, I thought screenlog.js lacked many useful features so I started working on this.
 
 This is what it looks like
-![Whoops, looks like the image won't load](http://puu.sh/o0N4L/190ddb295c.png "Preview")
+![Whoops, looks like the image won't load](http://puu.sh/ocZMI/c8aa771e9a.png "Preview")
 
-Initialize it like this, near the end of your head tag
+Initialize it like this, in your document's head before any other script is loaded.
 ```javascript
 <script src="mob-log.js"></script>
 <script>
 	MobLog.init({
 		intercept : ['log', 'info', 'error'],
+		catchErrors : true
 		allowInput : true
-	})
+	});
 </script>
 ```
-Intercept defines which type of console commands will also be logged in MobLog (only support for log, info and error in this version).
 
-allowInput adds an input field to the console where you can insert JavaScript code, this is done using eval() so NEVER use MobLog in production.
+## Options
+
+**intercept [array]**
+
+Defines which type of window.console calls will also be logged in MobLog (only support for .log(), .info() and .error() in this version).
+
+**catchErrors [boolean]**
+
+Enables or disables logging window errors (often caused by bugs/typos/malfunctioning code or browser incompatibility).
+
+**allowInput [boolean]**
+
+Adds an input field to the console where you can insert JavaScript code, this is done using eval() so NEVER EVER use this option in production.
 
 Once MobLog has been initialized it can't be initialized again, this is due to the fact that someone could re-initialize it and get access to the allowInput option.
 
-**Todo**
+## Todo
 - Syntax highlighting for objects
 - Object folding (instead of showing the raw object string)
 - Big array folding
 - Responsiveness
 - Browser support tests
 - Broader range of options (e.g. for styling or position)
-- Use up and down keys to navigate through command history
-- Fix scrolling
-- Catch every JavaScript error
+- I might add console.table and console.time to the intercept option, but I'm not sure if it's worth
+
+## Changelog
+
+**09-04**
+
+- Added error catching
+- Added catchErrors option
+- Added navigating through command history using up and down arrow keys
+
+---
+
+**10-04**
+
+- Added auto scrolling whenever a new line is written
+
+---
