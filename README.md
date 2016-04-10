@@ -48,7 +48,7 @@ Once MobLog has been initialized it can't be initialized again, this is due to t
 
 **11-04**
 
-- System errors now have an option to show the exact line at which the error occured (by clicking the [filename.extension:rulename] link)
+- System errors now have an option to show the exact line at which the error occured (by clicking the [filename.extension:lineno] link)
 
 ![Whoops, looks like the image won't load](http://puu.sh/odFgu/037eb0956f.png "Line Error")
 
