@@ -47,6 +47,12 @@ Once MobLog has been initialized it can't be initialized again, this is due to t
 
 ## Changelog
 
+**10-04**
+
+- Added auto scrolling whenever a new line is written
+
+---
+
 **09-04**
 
 - Added error catching
@@ -55,8 +61,3 @@ Once MobLog has been initialized it can't be initialized again, this is due to t
 
 ---
 
-**10-04**
-
-- Added auto scrolling whenever a new line is written
-
----
