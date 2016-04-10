@@ -114,6 +114,23 @@
 			backgroundColor : '#e74c3c !important',
 			color : 'white !important'
 		},
+		'.MobLog-lineLink' : {
+			fontWeight : 'bold',
+			color : 'white'
+		},
+		'.MobLog-codeBlock' : {
+			background: '#34495e !important',
+			color: 'white'
+		},
+		'.MobLog-fileName' : {
+			background : 'rgba(44, 62, 80,1.0)',
+			margin : '-2px -2px 0px -2px',
+			padding: '4px',
+			fontWeight : 'bold'
+		},
+		'.MobLog-line-error-highlight' : {
+			background : 'rgba(231, 76, 60, 0.4)'
+		},
 		'#MobLog-triggerShow-text' : {
 			width: '50px',
 			height: '34px'
@@ -150,7 +167,7 @@
 
 	var typeTransform = {
 		info 		: '<span class="MobLog-type-info MobLog-type">i</span> ',
-		log 		: '<span class="MobLog-type-regular MobLog-type">-</span>',
+		log 		: '<span class="MobLog-type-regular MobLog-type">-</span> ',
 		error 		: '<span class="MobLog-type-error MobLog-type">!</span> ',
 		systemError : '<span class="MogLog-type-systemError MobLog-type">&#10060;</span> '
 	}
@@ -282,18 +299,52 @@
 		}, false);
 	}
 
+	function applyNewLineEvents(node){
+		var lineLink = node.querySelector('.MobLog-lineLink');
+		if(lineLink){
+			lineLink.addEventListener('mouseup', function(e){
+				e.preventDefault();
+				var url = this.getAttribute('data-url');
+				var file = this.getAttribute('data-file');
+				var line = parseInt(this.getAttribute('data-line'));
+				var request = new XMLHttpRequest();
+		        request.open('GET', url, true);
+		        request.onload = function() {
+		            if (request.status >= 200 && request.status < 400) {
+		                var res = request.responseText;
+		                var lines = res.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\t/g, '&nbsp;').split('\n');
+		                var fileOutput = (line-2)+' : '+lines[line-3]+'<br>'+
+		                				 (line-1)+' : '+lines[line-2]+'<br>'+
+		                				 '<div class="MobLog-line-error-highlight">'+(line)+' : '+lines[line-1]+'</div>'+
+		                				 (line+1)+' : '+lines[line]+'<br>'+
+		                				 (line+2)+' : '+lines[line+1];
+		               	var outputFragment = 'div'.$({'class' : 'MobLog-line MobLog-codeBlock'}).html('<div class="MobLog-fileName">'+file+'</div>'+fileOutput).frag();
+		                app.cache.outputElement.appendChild(outputFragment);
+
+		                app.cache.outputElement.scrollTop += app.cache.outputElement.lastChild.offsetHeight;
+		            }
+		            else console.error('MobLog: Error loading file data for file '+file);
+		        };
+		        request.onerror = function() {
+		            console.error('MobLog: Error loading file data for file '+file);
+		        };
+		        request.send();
+			}, false);
+		}
+	}
+
 	function colorByType(inp){
 		switch(typeof inp){
 			case 'number' :
-				var coloredType = '<span style="color : #3694D3">'+inp+'</span>'
+				var coloredType = '<span style="color : #3694D3">'+inp+'</span>';
 			break;
 
 			case 'boolean':
-				var coloredType = '<span style="color : #9b59b6">'+inp+'</span>'
+				var coloredType = '<span style="color : #9b59b6">'+inp+'</span>';
 			break;
 
 			case 'string' :
-				var coloredType = '"<span style="color : #e74c3c">'+inp+'</span>"'
+				var coloredType = '"<span style="color : #e74c3c">'+inp+'</span>"';
 			break;
 
 			default:
@@ -302,31 +353,31 @@
 		return coloredType;
 	}
 
-	// ADD CODE HIGHTLIGHTING
 	function handleObjectType(obj){
 		var output = '';
 		if(Array.isArray(obj)){
 			output += '[';
-			var argsBind = obj;
-			argsBind.forEach(function(t, ind){
-				output += colorByType(t)+(argsBind.length !== ind+1 ? ', ' : '');
-			})
+			obj.forEach(function(t, ind){
+				output += colorByType(t)+(obj.length !== ind+1 ? ', ' : '');
+			});
 			output += ']';
 		}
+		// ADD CODE HIGHTLIGHTING
 		else output += JSON.stringify(obj);
 		return output;
 	}
 
 	function handleWindowError(message, source, lineno){
 		sourceArr = source.split('/');
-		source = '<b>['+sourceArr[sourceArr.length-1]+':'+lineno+']</b>';
+		var file = sourceArr[sourceArr.length-1];
+		source = '<a href="#" class="MobLog-lineLink" data-url="'+source+'" data-file="'+file+'" data-line="'+lineno+'">['+file+':'+lineno+']</a>';
 		var errorData = [message, source];
 		if(app.cache.outputElement) write(errorData, 'systemError');
 		else app.cache.logsBeforeDOMLoad.push({type : 'systemError', args : errorData});
 	}
 
 	function write(args, type){
-		var newLineClass = 'MobLog-line';
+		var newLineClassName = 'MobLog-line';
 		if(type !== 'systemError'){
 			var output = '';
 			for (var i = 0; i < args.length; i++) {
@@ -337,12 +388,13 @@
 		}
 		else{
 			var output = args.join(' ');
-			newLineClass += ' MobLog-systemError';
+			newLineClassName += ' MobLog-systemError';
 		}
-		var newLine = 'div'.$({'class' : newLineClass}).html(typeTransform[type]+output).frag();
+		var newLine = 'div'.$({'class' : newLineClassName}).html(typeTransform[type]+output).frag();
 		app.cache.outputElement.appendChild(newLine);
 
 		app.cache.outputElement.scrollTop += app.cache.outputElement.lastChild.offsetHeight;
+		applyNewLineEvents(app.cache.outputElement.lastChild);
 	}
 
 	function writeCachedConsoleCalls(){

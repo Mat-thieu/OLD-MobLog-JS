@@ -39,14 +39,22 @@ Once MobLog has been initialized it can't be initialized again, this is due to t
 ## Todo
 - Syntax highlighting for objects
 - Object folding (instead of showing the raw object string)
-- Big array folding
 - Responsiveness
 - Browser support tests
 - Broader range of options (e.g. for styling or position)
-- Upon a system error, make a link to the file in which the error occured, leading to the exact rule as well
 - Might add console.table and console.time to the intercept option, but I'm not sure if it's worth
 
 ## Changelog
+
+**11-04**
+
+- System errors now have an option to show the exact line at which the error occured (by clicking the [filename.extension:rulename] link)
+
+![Whoops, looks like the image won't load](http://puu.sh/odFgu/037eb0956f.png "Line Error")
+
+This does require MobLog to run on a http webserver though, it won't work on file://
+
+---
 
 **10-04**
 
