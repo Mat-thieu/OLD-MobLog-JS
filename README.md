@@ -42,7 +42,6 @@ Once MobLog has been initialized it can't be initialized again, this is due to t
 - Responsiveness
 - Browser support tests
 - Broader range of options (e.g. for styling or position)
-- Might add console.table and console.time to the intercept option, but I'm not sure if it's worth
 
 ## Changelog
 
@@ -50,7 +49,7 @@ Once MobLog has been initialized it can't be initialized again, this is due to t
 
 - System errors now have an option to show the exact line at which the error occured (by clicking the [filename.extension:lineno] link)
 
-![Whoops, looks like the image won't load](http://puu.sh/odFgu/037eb0956f.png "Line Error")
+![Whoops, looks like the image won't load](http://puu.sh/odMGw/f79531299e.png "Line Error")
 
 This does require MobLog to run on a http webserver though, it won't work on file://
 

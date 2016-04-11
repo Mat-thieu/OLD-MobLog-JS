@@ -61,7 +61,7 @@
 
 	// --- MobLog Code ---
 	var css = {
-		'#MobLog' : {
+		'#' : {
 			background: 'white',
 			width: '300px',
 			position: 'fixed',
@@ -72,25 +72,25 @@
 			transition: 'right 0.5s ease-out',
 			fontSize: '12px'
 		},
-		'#MobLog.showLog' : {
+		'#.showLog' : {
 			right: '5px'
 		},
-		'#MobLog-output' : {
+		'#-output' : {
 			maxHeight: '200px',
 			overflowY: 'auto'
 		},
-		'#MobLog-input' : {
+		'#-input' : {
 			width: '100%',
 			padding: '2px 2px 5px 4px',
 			margin: '0',
 			border: '0',
 			boxSizing: 'border-box'
 		},
-		'#MobLog-input:focus' : {
+		'#-input:focus' : {
 			outline: '0',
 			borderBottom: '1.5px solid #95a5a6'
 		},
-		'#MobLog-triggerShow' : {
+		'#-triggerShow' : {
 			background: '#3498db',
 			boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
 			color: '#ecf0f1',
@@ -106,60 +106,76 @@
 			borderBottomLeftRadius: '7px',
 			cursor: 'pointer'
 		},
-		'.MobLog-line' : {
+		'.-line' : {
 			padding: '3px',
 			color: '#34495e'
 		},
-		'.MobLog-systemError' : {
+		'.-systemError' : {
 			backgroundColor : '#e74c3c !important',
 			color : 'white !important'
 		},
-		'.MobLog-lineLink' : {
+		'.-lineLink' : {
 			fontWeight : 'bold',
 			color : 'white'
 		},
-		'.MobLog-codeBlock' : {
+		'.-codeBlock' : {
 			background: '#34495e !important',
 			color: 'white'
 		},
-		'.MobLog-fileName' : {
+		'.-fileName' : {
 			background : 'rgba(44, 62, 80,1.0)',
 			margin : '-2px -2px 0px -2px',
-			padding: '4px',
+			padding: '4px 4px 2px 4px',
 			fontWeight : 'bold'
 		},
-		'.MobLog-line-error-highlight' : {
+		'.-tab' : {
+			background : '#34495e',
+			padding : '2px 12px 2px 15px',
+			marginLeft : '20px',
+			borderTopLeftRadius : '7px',
+			borderTopRightRadius : '7px'
+		},
+		'.-tab-exit' : {
+			background : '#e74c3c',
+			borderRadius: '50%',
+			width: '7px',
+			height: '7px',
+			margin: '1px 0px 0px 4px',
+			display: 'inline-block',
+			cursor : 'pointer'
+		},
+		'.-line-error-highlight' : {
 			background : 'rgba(231, 76, 60, 0.4)'
 		},
-		'#MobLog-triggerShow-text' : {
+		'#-triggerShow-text' : {
 			width: '50px',
 			height: '34px'
 		},
-		'.MobLog-rotate' : {
+		'.-rotate' : {
 			transform: 'rotate(180deg)',
 			'-webkit-transform': 'rotate(180deg)'
 		},
-		'.MobLog-line:nth-child(even)': {
+		'.-line:nth-child(even)': {
 		   backgroundColor: '#ecf0f1'
 		},
-		'.MobLog-line:nth-child(odd)': {
+		'.-line:nth-child(odd)': {
 		   backgroundColor: '#DCE3E5'
 		},
-		'.MobLog-type' : {
+		'.-type' : {
 			fontSize: '16px',
 			fontWeight: 'bold',
 			padding: '1px 9px 1px 9px',
 		},
-		'.MobLog-type-info' : {
+		'.-type-info' : {
 			color: '#3498db',
 		},
-		'.MobLog-type-error' : {
+		'.-type-error' : {
 			color : '#e74c3c'
 		},
-		'.MobLog-type-regular' : {
+		'.-type-regular' : {
 			color : '#34495e'
 		},
-		'.MogLog-type-systemError' : {
+		'.-type-systemError' : {
 			fontSize : '0.82em',
 			marginLeft : '-3px'
 		}
@@ -169,7 +185,7 @@
 		info 		: '<span class="MobLog-type-info MobLog-type">i</span> ',
 		log 		: '<span class="MobLog-type-regular MobLog-type">-</span> ',
 		error 		: '<span class="MobLog-type-error MobLog-type">!</span> ',
-		systemError : '<span class="MogLog-type-systemError MobLog-type">&#10060;</span> '
+		systemError : '<span class="MobLog-type-systemError MobLog-type">&#10060;</span> '
 	}
 
 	var app = {
@@ -225,7 +241,7 @@
 		var styleString = '';
 		String.prototype.toDashedCase = function(){return this.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()}
 		Object.keys(css).forEach(function(selector){
-			styleString += selector+'{';
+			styleString += selector.replace(selector[0], selector[0]+'MobLog')+'{';
 			for(style in css[selector]){
 		    	styleString += style.toDashedCase()+':'+css[selector][style]+';';
 		    }
@@ -312,13 +328,13 @@
 		        request.onload = function() {
 		            if (request.status >= 200 && request.status < 400) {
 		                var res = request.responseText;
-		                var lines = res.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\t/g, '&nbsp;').split('\n');
+		                var lines = res.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\t/g, '&nbsp;&nbsp;').split('\n');
 		                var fileOutput = (line-2)+' : '+lines[line-3]+'<br>'+
 		                				 (line-1)+' : '+lines[line-2]+'<br>'+
 		                				 '<div class="MobLog-line-error-highlight">'+(line)+' : '+lines[line-1]+'</div>'+
 		                				 (line+1)+' : '+lines[line]+'<br>'+
 		                				 (line+2)+' : '+lines[line+1];
-		               	var outputFragment = 'div'.$({'class' : 'MobLog-line MobLog-codeBlock'}).html('<div class="MobLog-fileName">'+file+'</div>'+fileOutput).frag();
+		               	var outputFragment = 'div'.$({'class' : 'MobLog-line MobLog-codeBlock'}).html('<div class="MobLog-fileName"><span class="MobLog-tab">'+file+' <div class="MobLog-tab-exit"></div></span></div>'+fileOutput).frag();
 		                app.cache.outputElement.appendChild(outputFragment);
 
 		                app.cache.outputElement.scrollTop += app.cache.outputElement.lastChild.offsetHeight;
