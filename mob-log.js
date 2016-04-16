@@ -61,81 +61,91 @@
 
 	// --- MobLog Code ---
 	var css = {
-		'#' : {
+		// Note that the css is being prepended with "MobLog-" after the selector
+		'#MobLog' : {
 			background: 'white',
 			width: '300px',
 			position: 'fixed',
 			top: '5px',
 			right: '-295px',
 			boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
-			fontFamily: "'Arial', 'Helvetica', 'sans-serif'",
+			fontFamily: "'Arial', 'Helvetica', 'sans-serif' !important",
 			transition: 'right 0.5s ease-out',
-			fontSize: '12px'
+			fontSize: '12px !important'
 		},
-		'#.showLog' : {
-			right: '5px'
+		'.showLog' : {
+			right: '5px !important'
 		},
-		'#-output' : {
+		'#output' : {
 			maxHeight: '200px',
 			overflowY: 'auto'
 		},
-		'#-input' : {
+		'#input' : {
 			width: '100%',
 			padding: '2px 2px 5px 4px',
 			margin: '0',
 			border: '0',
 			boxSizing: 'border-box'
 		},
-		'#-input:focus' : {
+		'#input:focus' : {
 			outline: '0',
 			borderBottom: '1.5px solid #95a5a6'
 		},
-		'#-triggerShow' : {
+		'#triggerShow' : {
 			background: '#3498db',
 			boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
 			color: '#ecf0f1',
 			fontSize : '26px',
 			fontWeight: 'bold',
-			width: '50px',
+			width: '40px',
 			height: '35px',
-			marginLeft: '-50px',
+			marginLeft: '-40px',
 			marginBottom: '-35px',
+			padding: '7px',
 			textAlign: 'center',
 			boxSizing: 'border-box',
-			borderTopLeftRadius: '7px',
-			borderBottomLeftRadius: '7px',
+			borderTopLeftRadius: '20px',
+			borderBottomLeftRadius: '20px',
 			cursor: 'pointer'
 		},
-		'.-line' : {
+		'#triggerShow-text' : {
+			marginTop: '-6.5px'
+		},
+		'.rotate' : {
+			transform: 'rotate(180deg)',
+			'-webkit-transform': 'rotate(180deg)',
+			marginTop: '-3.5px !important'
+		},
+		'.line' : {
 			padding: '3px',
 			color: '#34495e'
 		},
-		'.-systemError' : {
+		'.systemError' : {
 			backgroundColor : '#e74c3c !important',
 			color : 'white !important'
 		},
-		'.-lineLink' : {
+		'.errorLineLink' : {
 			fontWeight : 'bold',
 			color : 'white'
 		},
-		'.-codeBlock' : {
+		'.codeBlock' : {
 			background: '#34495e !important',
 			color: 'white'
 		},
-		'.-fileName' : {
+		'.fileName' : {
 			background : 'rgba(44, 62, 80,1.0)',
 			margin : '-2px -2px 0px -2px',
 			padding: '4px 4px 2px 4px',
 			fontWeight : 'bold'
 		},
-		'.-tab' : {
+		'.tab' : {
 			background : '#34495e',
 			padding : '2px 12px 2px 15px',
 			marginLeft : '20px',
 			borderTopLeftRadius : '7px',
 			borderTopRightRadius : '7px'
 		},
-		'.-tab-exit' : {
+		'.tab-exit' : {
 			background : '#e74c3c',
 			borderRadius: '50%',
 			width: '7px',
@@ -144,51 +154,40 @@
 			display: 'inline-block',
 			cursor : 'pointer'
 		},
-		'.-line-error-highlight' : {
+		'.line-error-highlight' : {
 			background : 'rgba(231, 76, 60, 0.4)'
 		},
-		'#-triggerShow-text' : {
-			width: '50px',
-			height: '34px'
-		},
-		'.-rotate' : {
-			transform: 'rotate(180deg)',
-			'-webkit-transform': 'rotate(180deg)'
-		},
-		'.-line:nth-child(even)': {
+		'.line:nth-child(even)': {
 		   backgroundColor: '#ecf0f1'
 		},
-		'.-line:nth-child(odd)': {
+		'.line:nth-child(odd)': {
 		   backgroundColor: '#DCE3E5'
 		},
-		'.-type' : {
+		'.type' : {
 			fontSize: '16px',
 			fontWeight: 'bold',
 			padding: '1px 9px 1px 9px',
 		},
-		'.-type-info' : {
+		'.type-info' : {
 			color: '#3498db',
 		},
-		'.-type-error' : {
+		'.type-error' : {
 			color : '#e74c3c'
 		},
-		'.-type-regular' : {
+		'.type-regular' : {
 			color : '#34495e'
 		},
-		'.-type-systemError' : {
+		'.type-systemError' : {
 			fontSize : '0.82em',
-			marginLeft : '-3px'
+			marginLeft : '-3.5px',
+			color : '#fff !important'
 		}
 	}
 
-	var typeTransform = {
-		info 		: '<span class="MobLog-type-info MobLog-type">i</span> ',
-		log 		: '<span class="MobLog-type-regular MobLog-type">-</span> ',
-		error 		: '<span class="MobLog-type-error MobLog-type">!</span> ',
-		systemError : '<span class="MobLog-type-systemError MobLog-type">&#10060;</span> '
-	}
-
 	var app = {
+		settings : { // Settings which aren't major enough to let the user adjust in the init call
+			codeViewerScope : 2 // The amount of lines surrounding the error line when opening the code inspector
+		},
 		state : {
 			isInitialized : false,
 			isHidden : true
@@ -208,6 +207,7 @@
 		options.intercept = options.intercept || false;
 		options.allowInput = options.allowInput || false;
 		options.catchErrors = options.catchErrors || false;
+		options.api = options.api || false;
 
 		// Generate the CSS
 		document.head.appendChild(generateCSS());
@@ -239,9 +239,10 @@
 
 	function generateCSS(){
 		var styleString = '';
-		String.prototype.toDashedCase = function(){return this.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()}
+		String.prototype.toDashedCase = function(){return this.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();}
 		Object.keys(css).forEach(function(selector){
-			styleString += selector.replace(selector[0], selector[0]+'MobLog')+'{';
+			if(selector !== '#MobLog') styleString += selector.replace(selector[0], selector[0]+'MobLog-')+'{';
+			else styleString += selector+'{';
 			for(style in css[selector]){
 		    	styleString += style.toDashedCase()+':'+css[selector][style]+';';
 		    }
@@ -258,7 +259,7 @@
 				'div'.$({'id' : 'MobLog-triggerShow-text'}).txt('«')
 			]),
 			'div'.$({'id' : 'MobLog-output'}),
-			(function(){if(hasInput) return 'input'.$({'type' : 'text', 'id' : 'MobLog-input'}); else return 'span'.$()})()
+			(function(){ return hasInput ? 'input'.$({'type' : 'text', 'id' : 'MobLog-input'}) : 'span'.$() })()
 		]).frag();
 
 		return consoleFragment;
@@ -303,70 +304,145 @@
 		var triggerShow = _id('MobLog-triggerShow');
 		triggerShow.addEventListener('mouseup', function(){
 			if(app.state.isHidden){
-				addClass(_id('MobLog'), 'showLog');
+				addClass(_id('MobLog'), 'MobLog-showLog');
 				addClass(_id('MobLog-triggerShow-text'), 'MobLog-rotate');
 				app.state.isHidden = false;
 			}
 			else{
-				removeClass(_id('MobLog'), 'showLog');
+				removeClass(_id('MobLog'), 'MobLog-showLog');
 				removeClass(_id('MobLog-triggerShow-text'), 'MobLog-rotate');
 				app.state.isHidden = true;
 			}
 		}, false);
 	}
 
-	function applyNewLineEvents(node){
-		var lineLink = node.querySelector('.MobLog-lineLink');
-		if(lineLink){
-			lineLink.addEventListener('mouseup', function(e){
+	function extendConsole(type){
+		var newLog = function(){
+			if(app.cache.outputElement) write(arguments, type);
+			else app.cache.logsBeforeDOMLoad.push({args : arguments, type : type});
+		}
+
+		return function(){
+			newLog.apply(this, arguments);
+			if (typeof app.cache._console[type] === 'function') {
+				app.cache._console[type].apply(console, arguments);
+			}
+		};
+	}
+
+	function write(args, type){
+		var typeTransform = {
+			info 		: 'span'.$({'class' : 'MobLog-type MobLog-type-info'}).txt('i'),
+			log 		: 'span'.$({'class' : 'MobLog-type MobLog-type-regular'}).txt('-'),
+			error 		: 'span'.$({'class' : 'MobLog-type MobLog-type-error'}).txt('!'),
+			systemError : 'span'.$({'class' : 'MobLog-type MobLog-type-systemError'}).html('&#10060;')
+		}
+		var newLineClassName = 'MobLog-line';
+		if(type == 'systemError'){
+			var output = args.join(' ');
+			newLineClassName += ' MobLog-systemError';
+		}
+		else{
+			var output = '';
+			for (var i = 0; i < args.length; i++) {
+				if(typeof args[i] == 'object') output += handleObjectType(args[i]);
+				else output += colorByType(args[i]);
+				output += ' ';
+			}
+		}
+		var newLine = 'div'.$({'class' : newLineClassName}).html(typeTransform[type].raw()+' '+output).frag();
+		app.cache.outputElement.appendChild(newLine);
+
+		app.cache.outputElement.scrollTop += app.cache.outputElement.lastChild.offsetHeight;
+		applyNewLineEvents(app.cache.outputElement.lastChild);
+	}
+
+	function writeCachedConsoleCalls(){
+		app.cache.logsBeforeDOMLoad.forEach(function(data){
+			write(data.args, data.type);
+		});
+	}
+
+	function applyNewLineEvents(newLineNode){
+		var errorLineLink = newLineNode.querySelector('.MobLog-errorLineLink');
+		if(errorLineLink){
+			errorLineLink.addEventListener('mouseup', function(e){
 				e.preventDefault();
 				var url = this.getAttribute('data-url');
 				var file = this.getAttribute('data-file');
 				var line = parseInt(this.getAttribute('data-line'));
-				var request = new XMLHttpRequest();
-		        request.open('GET', url, true);
-		        request.onload = function() {
-		            if (request.status >= 200 && request.status < 400) {
-		                var res = request.responseText;
-		                var lines = res.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\t/g, '&nbsp;&nbsp;').split('\n');
-		                var fileOutput = (line-2)+' : '+lines[line-3]+'<br>'+
-		                				 (line-1)+' : '+lines[line-2]+'<br>'+
-		                				 '<div class="MobLog-line-error-highlight">'+(line)+' : '+lines[line-1]+'</div>'+
-		                				 (line+1)+' : '+lines[line]+'<br>'+
-		                				 (line+2)+' : '+lines[line+1];
-		               	var outputFragment = 'div'.$({'class' : 'MobLog-line MobLog-codeBlock'}).html('<div class="MobLog-fileName"><span class="MobLog-tab">'+file+' <div class="MobLog-tab-exit"></div></span></div>'+fileOutput).frag();
-		                app.cache.outputElement.appendChild(outputFragment);
-
-		                app.cache.outputElement.scrollTop += app.cache.outputElement.lastChild.offsetHeight;
-		            }
-		            else console.error('MobLog: Error loading file data for file '+file);
-		        };
-		        request.onerror = function() {
-		            console.error('MobLog: Error loading file data for file '+file);
-		        };
-		        request.send();
+				displayErrorLine(url, file, line);
 			}, false);
 		}
+	}
+
+	function handleWindowError(message, source, lineno){
+		sourceArr = source.split('/');
+		var file = sourceArr[sourceArr.length-1];
+		source = 'a'.$({
+					'href' : '#',
+					'class' : 'MobLog-errorLineLink',
+					'data-url' : source,
+					'data-file' : file,
+					'data-line' : lineno
+				 }).txt('['+file+':'+lineno+']').raw();
+		var errorLine = [message, source];
+		if(app.cache.outputElement) write(errorLine, 'systemError');
+		else app.cache.logsBeforeDOMLoad.push({args : errorLine, type : 'systemError'});
+	}
+
+	function displayErrorLine(url, file, line){
+		var request = new XMLHttpRequest();
+        request.open('GET', url, true);
+        request.onload = function() {
+            if (request.status >= 200 && request.status < 400) buildCodeBlock(request.responseText);
+            else console.error('MobLog: Error loading file data for file '+file);
+        };
+        request.onerror = function() {
+            console.error('MobLog: Error loading file data for file '+file);
+        };
+        request.send();
+
+        function buildCodeBlock(serverData){
+        	var scope = app.settings.codeViewerScope;
+            var fileContent = serverData.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\t/g, '&nbsp;&nbsp;').split('\n');
+            var output = {
+            	before : [],
+            	after : []
+            }
+            for (var i = 0; i < scope; i++) {
+            	output.before.push((line-(i+1))+' : '+fileContent[line-(i+2)]);
+            	output.after.push((line+(i+1))+' : '+fileContent[line+i]);
+            };
+            var fileOutput =
+                	output.before.reverse().join('<br>')+
+                	'div'.$({'class' : 'MobLog-line-error-highlight'}).html((line)+' : '+fileContent[line-1]).raw()+
+                	output.after.join('<br>');
+           	var outputFragment = 'div'.$({'class' : 'MobLog-line MobLog-codeBlock'}).html('<div class="MobLog-fileName"><span class="MobLog-tab">'+file+' <div class="MobLog-tab-exit"></div></span></div>'+fileOutput).frag();
+            app.cache.outputElement.appendChild(outputFragment);
+
+            app.cache.outputElement.scrollTop += app.cache.outputElement.lastChild.offsetHeight;
+        }
 	}
 
 	function colorByType(inp){
 		switch(typeof inp){
 			case 'number' :
-				var coloredType = '<span style="color : #3694D3">'+inp+'</span>';
+				var coloredType = 'span'.$({'style' : 'color: #3694D3'}).txt(inp);
 			break;
 
 			case 'boolean':
-				var coloredType = '<span style="color : #9b59b6">'+inp+'</span>';
+				var coloredType = 'span'.$({'style' : 'color: #9b59b6'}).txt(inp);
 			break;
 
 			case 'string' :
-				var coloredType = '"<span style="color : #e74c3c">'+inp+'</span>"';
+				var coloredType = 'span'.$({'style' : 'color: #e74c3c'}).txt('"'+inp+'"');
 			break;
 
 			default:
-				var coloredType = inp;
+				return inp;
 		}
-		return coloredType;
+		return coloredType.raw();
 	}
 
 	function handleObjectType(obj){
@@ -381,56 +457,6 @@
 		// ADD CODE HIGHTLIGHTING
 		else output += JSON.stringify(obj);
 		return output;
-	}
-
-	function handleWindowError(message, source, lineno){
-		sourceArr = source.split('/');
-		var file = sourceArr[sourceArr.length-1];
-		source = '<a href="#" class="MobLog-lineLink" data-url="'+source+'" data-file="'+file+'" data-line="'+lineno+'">['+file+':'+lineno+']</a>';
-		var errorData = [message, source];
-		if(app.cache.outputElement) write(errorData, 'systemError');
-		else app.cache.logsBeforeDOMLoad.push({type : 'systemError', args : errorData});
-	}
-
-	function write(args, type){
-		var newLineClassName = 'MobLog-line';
-		if(type !== 'systemError'){
-			var output = '';
-			for (var i = 0; i < args.length; i++) {
-				if(typeof args[i] !== 'object') output += colorByType(args[i]);
-				else output += handleObjectType(args[i]);
-				output += ' ';
-			}
-		}
-		else{
-			var output = args.join(' ');
-			newLineClassName += ' MobLog-systemError';
-		}
-		var newLine = 'div'.$({'class' : newLineClassName}).html(typeTransform[type]+output).frag();
-		app.cache.outputElement.appendChild(newLine);
-
-		app.cache.outputElement.scrollTop += app.cache.outputElement.lastChild.offsetHeight;
-		applyNewLineEvents(app.cache.outputElement.lastChild);
-	}
-
-	function writeCachedConsoleCalls(){
-		app.cache.logsBeforeDOMLoad.forEach(function(data){
-			write(data.args, data.type);
-		});
-	}
-
-	function extendConsole(type){
-		var newLog = function(){
-			if(app.cache.outputElement) write(arguments, type);
-			else app.cache.logsBeforeDOMLoad.push({type : type, args : arguments});
-		}
-
-		return function(){
-			newLog.apply(this, arguments);
-			if (typeof app.cache._console[type] === 'function') {
-				app.cache._console[type].apply(console, arguments);
-			}
-		};
 	}
 
 	// Assign safe functions to global scope (learned this from screenlog.js, fantastic solution!)
