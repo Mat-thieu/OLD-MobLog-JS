@@ -42,6 +42,7 @@ Once MobLog has been initialized it can't be initialized again, this is due to t
 - Responsiveness
 - Browser support tests
 - Broader range of options (e.g. for styling or position)
+- Add option to post data to a server in set intervals
 
 ## Changelog
 
